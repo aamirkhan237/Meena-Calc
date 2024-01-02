@@ -90,22 +90,39 @@
                     var quantity = parseInt($(row).find('input[name="quantity[]"]').val()) || 1;
                     var discount = parseFloat($(row).find('input[name="discount[]"]').val()) || 0;
                     var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('$')[1]);
-                
+                    $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function() {
+                        quantityInput.val('1');
+                    });
                     // Calculate the row price
                     var rowPrice = pricePerGram * grams * quantity * (1 - discount / 100);
                     $(row).find('input[name="price[]"]').val(rowPrice.toFixed(2));
-                }
 
+
+                    
+                }
+                function addOrderRow() {
+                    var newRow = $('.order-row:first').clone();
+                    $('#orders-container').append(newRow);   
+                    
+                    // Set default values to the new row
+                    newRow.find('input[name="quantity[]"]').val('1');
+                    newRow.find('input[name="discount[]"]').val('0');
+                
+                    // Clear other values in the new row
+                    newRow.find('input[name="grams[]"], input[name="price[]"]').val('');
+                    newRow.find('select[name="product[]"]').val('');
+                
+                    // Calculate row price for the new row immediately after adding
+                    calculateRowPrice(newRow);
+                }
+                
                 // Add order button functionality
                 $('#add-order').on('click', function() {
-                    // Clone the first order row and append it to the orders container
-                    var newRow = $('.order-row:first').clone();
-                    $('#orders-container').append(newRow);
-                
-                    // Clear values in the new row
-                    newRow.find('input').val('');
-                    newRow.find('select').val('');
+                    addOrderRow();
                 });
+
+                calculateRowPrice($('.order-row:first'));
+
 
                 // Process order button functionality
                 $('#process-order').on('click', function() {
