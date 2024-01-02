@@ -1,20 +1,41 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Product Order Form</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        body {
+            background-color: #f5f5f5;
+            /* Light gray background */
+        }
+
         .order-row {
             display: flex;
             align-items: center;
         }
+
         .order-row .form-group {
             margin-right: 10px;
         }
+
+        .custom-navbar-bg {
+            background-color: #f4ce5b;
+        }
     </style>
 </head>
+
 <body>
+    <nav class="navbar navbar-expand-lg navbar bg custom-navbar-bg" style="padding-top: 5px; padding-bottom: 5px;">
+        <div class="container">
+            <a class="navbar-brand mx-auto" href="#">
+                <img src="{% static 'images/meenalogo.png' %}" alt="Logo" width="130" height="auto">
+            </a>
+        </div>
+    </nav>
     <div class="container mt-4">
         <form method="post" id="orderForm">
             {% csrf_token %}
@@ -25,7 +46,7 @@
                         <select name="product[]" class="form-control">
                             <option value="">Select a Product</option>
                             {% for product in products %}
-                                <option value="{{ product.id }}">{{ product.name }} - ${{ product.price_per_gram }}</option>
+                            <option value="{{ product.id }}">{{ product.name }} - ${{ product.price_per_gram }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -68,8 +89,8 @@
                     <th>Price</th>
                 </tr>
             </thead>
-             <tbody id="order-details">
-                </tbody>
+            <tbody id="order-details">
+            </tbody>
             <tfoot>
                 <tr>
                     <td colspan="4"><strong>Total Price:</strong></td>
@@ -83,14 +104,14 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
                 function calculateRowPrice(row) {
                     // Retrieve values from the current row
                     var grams = parseFloat($(row).find('input[name="grams[]"]').val()) || 0;
                     var quantity = parseInt($(row).find('input[name="quantity[]"]').val()) || 1;
                     var discount = parseFloat($(row).find('input[name="discount[]"]').val()) || 0;
                     var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('$')[1]);
-                    $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function() {
+                    $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function () {
                         quantityInput.val('1');
                     });
                     // Calculate the row price
@@ -98,26 +119,26 @@
                     $(row).find('input[name="price[]"]').val(rowPrice.toFixed(2));
 
 
-                    
+
                 }
                 function addOrderRow() {
                     var newRow = $('.order-row:first').clone();
-                    $('#orders-container').append(newRow);   
-                    
+                    $('#orders-container').append(newRow);
+
                     // Set default values to the new row
                     newRow.find('input[name="quantity[]"]').val('1');
                     newRow.find('input[name="discount[]"]').val('0');
-                
+
                     // Clear other values in the new row
                     newRow.find('input[name="grams[]"], input[name="price[]"]').val('');
                     newRow.find('select[name="product[]"]').val('');
-                
+
                     // Calculate row price for the new row immediately after adding
                     calculateRowPrice(newRow);
                 }
-                
+
                 // Add order button functionality
-                $('#add-order').on('click', function() {
+                $('#add-order').on('click', function () {
                     addOrderRow();
                 });
 
@@ -125,23 +146,23 @@
 
 
                 // Process order button functionality
-                $('#process-order').on('click', function() {
+                $('#process-order').on('click', function () {
                     var total = 0;
                     $('#current-orders tbody').empty(); // Clear previous table rows
-                
+
                     // Iterate through each order row
-                    $('.order-row').each(function() {
+                    $('.order-row').each(function () {
                         var row = $(this);
                         calculateRowPrice(row); // Calculate row price
                         var rowPrice = parseFloat(row.find('input[name="price[]"]').val()) || 0;
                         total += rowPrice; // Add row price to total
-                
+
                         // Retrieve order details
                         var product = row.find('select[name="product[]"]').find(':selected').text().split(' - ')[0];
                         var grams = row.find('input[name="grams[]"]').val();
                         var quantity = row.find('input[name="quantity[]"]').val();
                         var discount = row.find('input[name="discount[]"]').val();
-                
+
                         // Append order details to the table
                         $('#current-orders tbody').append('<tr>' +
                             '<td>' + product + '</td>' +
@@ -151,13 +172,14 @@
                             '<td>' + rowPrice.toFixed(2) + '</td>' +
                             '</tr>');
                     });
-                
+
                     // Display the total price
                     $('#total-price').text(total.toFixed(2));
                 });
-                
+
             });
         </script>
     </div>
 </body>
+
 </html>

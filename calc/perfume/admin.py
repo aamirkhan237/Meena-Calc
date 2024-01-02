@@ -4,7 +4,11 @@ from .models import Product, CustomerOrder
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "price_per_gram")
+    list_display = ("id", "name", "price_per_gram")  # Add 'id' to the list_display
+
+    # Optionally, you can include other fields you want to make searchable or filterable in the admin
+    search_fields = ("name",)
+    list_filter = ("price_per_gram",)
 
 
 @admin.register(CustomerOrder)
