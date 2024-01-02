@@ -1,38 +1,37 @@
 from django.shortcuts import render
 from .models import Product, CustomerOrder
 from django.http import JsonResponse
+from .serializers import CustomerOrderSerializer
+from decimal import Decimal
 
 
 def order_form(request):
-    products = Product.objects.all()
-    orders = CustomerOrder.objects.all()
-    context = {"products": products, "orders": orders}
-    return render(request, "order_form.html", context)
-
-
-def process_order(request):
     if request.method == "POST":
-        products = request.POST.getlist("product")
-        grams = request.POST.getlist("grams")
-        quantities = request.POST.getlist("quantity")
-        discounts = request.POST.getlist("discount")
+        # Retrieve form data
+        products_list = request.POST.getlist("product[]")
+        grams_list = request.POST.getlist("grams[]")
+        quantities_list = request.POST.getlist("quantity[]")
+        discounts_list = request.POST.getlist("discount[]")
 
-        total_price = 0
-        orders = []
+        # Process the order
+        total_price = Decimal("0")
+        new_orders = []
 
-        for i in range(len(products)):
-            product_id = products[i]
+        for i in range(len(products_list)):
+            product_id = products_list[i]
             try:
                 product = Product.objects.get(id=product_id)
-                grams_val = float(grams[i]) if grams[i] else 0
-                quantity_val = int(quantities[i]) if quantities[i] else 0
-                discount_val = float(discounts[i]) if discounts[i] else 0
+                grams_val = Decimal(grams_list[i]) if grams_list[i] else Decimal("0")
+                quantity_val = int(quantities_list[i]) if quantities_list[i] else 0
+                discount_val = (
+                    Decimal(discounts_list[i]) if discounts_list[i] else Decimal("0")
+                )
 
                 row_price = (
                     product.price_per_gram
                     * grams_val
                     * quantity_val
-                    * (1 - discount_val / 100)
+                    * (Decimal("1") - discount_val / Decimal("100"))
                 )
                 total_price += row_price
 
@@ -44,21 +43,22 @@ def process_order(request):
                     row_price=row_price,
                 )
                 order.save()
-                orders.append(order)
+                new_orders.append(order)
             except (Product.DoesNotExist, ValueError):
                 pass
 
-        orders = CustomerOrder.objects.filter(
-            id__in=[o.id for o in orders]
-        )  # Retrieve saved orders
+        new_orders = CustomerOrder.objects.filter(id__in=[o.id for o in new_orders])
+        serializer = CustomerOrderSerializer(new_orders, many=True)
+        serialized_orders = serializer.data
 
-        context = {"orders": orders, "total_price": total_price}
+        context = {
+            "orders": serialized_orders,
+            "total_price": total_price,
+        }
         return JsonResponse({"success": True, "context": context})
 
-    return JsonResponse({"success": False, "error": "Invalid Request"})
-
-
-# Your HTML and JavaScript code remains the same with the following changes:
-
-# 1. Add and Delete Buttons for Order Rows
-# 2. Refactored JavaScript to handle row addition, deletion, and form submission efficiently.
+    else:  # For GET request
+        products = Product.objects.all()
+        orders = CustomerOrder.objects.all()
+        context = {"products": products, "orders": orders}
+        return render(request, "order_form.html", context)

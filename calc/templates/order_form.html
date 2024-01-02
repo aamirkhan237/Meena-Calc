@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="container mt-4">
-        <form method="post" action="{% url 'process_order' %}">
+        <form method="post" id="orderForm">
             {% csrf_token %}
             <div id="orders-container">
                 <div class="order-row">
@@ -53,114 +53,94 @@
             </div>
 
             <button type="button" id="add-order" class="btn btn-primary">+ Add Order</button>
-            <button type="submit" class="btn btn-success">Process Order</button>
+            <button type="button" id="process-order" class="btn btn-success">Process Order</button>
         </form>
 
-   <!-- Your previous HTML code remains unchanged -->
+        <!-- Table to display current orders -->
+        <h2>Current Orders</h2>
+        <table id="current-orders" class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Grams</th>
+                    <th>Quantity</th>
+                    <th>Discount (%)</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+             <tbody id="order-details">
+                </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4"><strong>Total Price:</strong></td>
+                    <td><span id="total-price">0.00</span></td>
+                </tr>
+            </tfoot>
+        </table>
 
-<!-- Table to display current orders -->
-<!-- Previous HTML remains unchanged -->
-<!-- Table to display current orders -->
-<h2>Current Orders</h2>
-<table id="current-orders" class="table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Grams</th>
-            <th>Quantity</th>
-            <th>Discount (%)</th>
-            <th>Price</th>
-        </tr>
-    </thead>
-    <tbody id="order-details">
-        {% for order in orders %}
-            <tr>
-                <td>{{ order.product.name }}</td>
-                <td>{{ order.grams }}</td>
-                <td>{{ order.quantity }}</td>
-                <td>{{ order.discount }}</td>
-                <td>{{ order.row_price }}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="4"><strong>Total Price:</strong></td>
-            <td><span id="total-price">{{ total_price }}</span></td>
-        </tr>
-    </tfoot>
-</table>
-<!-- Your previous form code remains unchanged -->
+        <!-- Bootstrap JS and jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+        <script>
+            $(document).ready(function() {
+                function calculateRowPrice(row) {
+                    // Retrieve values from the current row
+                    var grams = parseFloat($(row).find('input[name="grams[]"]').val()) || 0;
+                    var quantity = parseInt($(row).find('input[name="quantity[]"]').val()) || 1;
+                    var discount = parseFloat($(row).find('input[name="discount[]"]').val()) || 0;
+                    var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('$')[1]);
+                
+                    // Calculate the row price
+                    var rowPrice = pricePerGram * grams * quantity * (1 - discount / 100);
+                    $(row).find('input[name="price[]"]').val(rowPrice.toFixed(2));
+                }
 
+                // Add order button functionality
+                $('#add-order').on('click', function() {
+                    // Clone the first order row and append it to the orders container
+                    var newRow = $('.order-row:first').clone();
+                    $('#orders-container').append(newRow);
+                
+                    // Clear values in the new row
+                    newRow.find('input').val('');
+                    newRow.find('select').val('');
+                });
 
-<!-- Your previous form code remains unchanged -->
-
+                // Process order button functionality
+                $('#process-order').on('click', function() {
+                    var total = 0;
+                    $('#current-orders tbody').empty(); // Clear previous table rows
+                
+                    // Iterate through each order row
+                    $('.order-row').each(function() {
+                        var row = $(this);
+                        calculateRowPrice(row); // Calculate row price
+                        var rowPrice = parseFloat(row.find('input[name="price[]"]').val()) || 0;
+                        total += rowPrice; // Add row price to total
+                
+                        // Retrieve order details
+                        var product = row.find('select[name="product[]"]').find(':selected').text().split(' - ')[0];
+                        var grams = row.find('input[name="grams[]"]').val();
+                        var quantity = row.find('input[name="quantity[]"]').val();
+                        var discount = row.find('input[name="discount[]"]').val();
+                
+                        // Append order details to the table
+                        $('#current-orders tbody').append('<tr>' +
+                            '<td>' + product + '</td>' +
+                            '<td>' + grams + '</td>' +
+                            '<td>' + quantity + '</td>' +
+                            '<td>' + discount + '</td>' +
+                            '<td>' + rowPrice.toFixed(2) + '</td>' +
+                            '</tr>');
+                    });
+                
+                    // Display the total price
+                    $('#total-price').text(total.toFixed(2));
+                });
+                
+            });
+        </script>
     </div>
-
-    <!-- Bootstrap JS and jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<!-- Your previous HTML code remains unchanged -->
-<script>
-$(document).ready(function() {
-    $('#add-order').click(function() {
-        var newRow = $('.order-row').first().clone();
-        newRow.find('input, select').val('');
-        $('#orders-container').append(newRow);
-        calculateRowPrice(newRow); // Calculate row price for the new order row
-    });
-
-    // Calculate row price based on grams, quantity, and product price per gram
-    function calculateRowPrice(row) {
-        var grams = $(row).find('input[name="grams[]"]').val();
-        var quantity = $(row).find('input[name="quantity[]"]').val();
-        var discount = $(row).find('input[name="discount[]"]').val();
-        var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('$')[1]);
-
-        var rowPrice = pricePerGram * grams * quantity * (1 - discount / 100);
-        $(row).find('input[name="price[]"]').val(rowPrice.toFixed(2));
-    }
-
-    // Calculate total price on form submission
-    $('form').submit(function() {
-        var total = 0;
-        $('#order-details').empty(); // Clear previous table rows
-
-        $('input[name="price[]"]').each(function() {
-            total += parseFloat($(this).val()) || 0;
-            var row = $(this).closest('.order-row');
-            var product = row.find('select[name="product[]"]').find(':selected').text().split(' - ')[0];
-            var grams = row.find('input[name="grams[]"]').val();
-            var quantity = row.find('input[name="quantity[]"]').val();
-            var discount = row.find('input[name="discount[]"]').val();
-            var rowPrice = parseFloat($(this).val()) || 0;
-
-            $('#order-details').append('<tr>' +
-                '<td>' + product + '</td>' +
-                '<td>' + grams + '</td>' +
-                '<td>' + quantity + '</td>' +
-                '<td>' + discount + '</td>' +
-                '<td>' + rowPrice.toFixed(2) + '</td>' +
-                '</tr>');
-        });
-
-        var discount = parseFloat($('#discount').val()) || 0;
-        var discountedTotal = total * (1 - discount / 100);
-        $('#total-price').text(discountedTotal.toFixed(2));
-
-        return confirm('Are you sure you want to submit the order?');
-    });
-
-    // Calculate row price for the first order row when the page loads
-    calculateRowPrice($('.order-row').first());
-
-    // Calculate row price when inputs change
-    $(document).on('change', '.order-row input, .order-row select', function() {
-        calculateRowPrice($(this).closest('.order-row'));
-    });
-});
-</script>
-
 </body>
 </html>

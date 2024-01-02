@@ -14,6 +14,7 @@ class CustomerOrder(models.Model):
     grams = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField(default=1)
     discount = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
+    row_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def calculate_price(self):
         price = self.product.price_per_gram * self.grams * self.quantity
