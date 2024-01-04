@@ -3,6 +3,11 @@ from .models import Product, CustomerOrder
 from django.http import JsonResponse
 from .serializers import CustomerOrderSerializer
 from decimal import Decimal
+from .serializers import ProductSerializer
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 
 
 def order_form(request):
@@ -62,3 +67,24 @@ def order_form(request):
         orders = CustomerOrder.objects.all()
         context = {"products": products, "orders": orders}
         return render(request, "order_form.html", context)
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10  # Number of items per page
+    page_size_query_param = "page_size"
+    max_page_size = 1000  # Maximum page size
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    pagination_class = CustomPagination
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )

@@ -7,4 +7,4 @@ class AddProductForm(forms.Form):
     product = forms.ModelChoiceField(queryset=Product.objects.all())
     gram = forms.DecimalField()
     quantity = forms.IntegerField()
-    discount = forms.DecimalField(required=False)
+    discount = forms.DecimalField(required=False, min_value=0)
