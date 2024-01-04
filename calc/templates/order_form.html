@@ -51,7 +51,7 @@
                             <option value="">Select a Product</option>
                             {% for product in products %}
                             <option class="option" value="{{ product.id }}">{{ product.name }} -
-                                ${{product.price_per_gram }}</option>
+                                &#8377; {{product.price_per_gram }}</option>
                             {% endfor %}
                         </select>
 
@@ -137,7 +137,8 @@
                     var grams = parseFloat($(row).find('input[name="grams[]"]').val()) || 0;
                     var quantity = parseInt($(row).find('input[name="quantity[]"]').val()) || 1;
                     var discount = parseFloat($(row).find('input[name="discount[]"]').val()) || 0;
-                    var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('$')[1]);
+                    var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('₹')[1]);
+
                     $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function () {
                         quantityInput.val('1');
                     });
