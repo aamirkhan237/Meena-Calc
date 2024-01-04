@@ -7,8 +7,6 @@
     <title>Product Order Form</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
     <style>
         body {
@@ -137,6 +135,10 @@
                     var grams = parseFloat($(row).find('input[name="grams[]"]').val()) || 0;
                     var quantity = parseInt($(row).find('input[name="quantity[]"]').val()) || 1;
                     var discount = parseFloat($(row).find('input[name="discount[]"]').val()) || 0;
+                    if (discount < 0) {
+                        discount = 0; // Set discount to 0 if it's negative
+                        parseFloat($(row).find('input[name="discount[]"]').val('0')); // Set the input field value to 0
+                    }
                     var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('₹')[1]);
 
                     $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function () {
