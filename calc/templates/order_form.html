@@ -7,11 +7,13 @@
     <title>Product Order Form</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Salsa&display=swap" rel="stylesheet">
 
     <style>
         .custom-bg-color {
             background-color: lightgreen;
-
             color: black;
         }
 
@@ -32,17 +34,51 @@
         .custom-navbar-bg {
             background-color: #f4ce5b;
         }
+
+        /* Position the delete button icon */
+        .delete-icon {
+            width: 30px;
+            /* Set width as needed */
+            height: 25px;
+            /* Set height as needed */
+            cursor: pointer;
+            /* Set cursor as pointer for interaction */
+            margin-left: 10px;
+            /* Adjust margin as needed for spacing */
+            margin-top: 25px;
+        }
+
+        .align-items-center {
+            justify-content: center;
+            align-items: center;
+            margin-left: 350px;
+        }
+
+        p {
+            margin-top: 9px;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar bg custom-navbar-bg" style="padding-top: 5px; padding-bottom: 5px;">
         <div class="container">
-            <a class="navbar-brand mx-auto" href="#">
-                <img src="{% static 'images/meenalogo.png' %}" alt="Logo" width="130" height="auto">
+            <a class="navbar-brand" href="https://www.meenafragrances.com/" target="_blank">
+                <div class="row align-items-center">
+                    <div class="col-12 col-lg-auto">
+                        <img src="{% static 'images/meenalogo.png' %}" alt="Logo" width="130" height="auto">
+                    </div>
+                    <div class="col-12 col-lg-auto pl-lg-3">
+                        <div style="color: #a23c37; font-family: 'Kaushan Script', cursive;">
+                            <p>All fragrances, All time</p>
+                        </div>
+                    </div>
+                </div>
             </a>
         </div>
     </nav>
+
     <div class="container mt-4">
         <form method="post" id="orderForm">
             {% csrf_token %}
@@ -79,6 +115,9 @@
                     <div class="form-group">
                         <label for="price">Price:</label>
                         <input type="text" name="price[]" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <img src="{% static 'images/delete_logo.png' %}" alt="Delete" class="delete-icon">
                     </div>
                 </div>
             </div>
@@ -121,6 +160,31 @@
                 <input type="text" id="final-price" class="form-control final-price-color .custom-bg-color">
             </div>
         </div>
+
+        <div class="container">
+            <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+                <div class="col-md-4 d-flex align-items-center">
+                    <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+                        <svg class="bi" width="30" height="24">
+                            <use xlink:href="#bootstrap"></use>
+                        </svg>
+                    </a>
+                    <span class="text-muted">© Meena Company, Inc</span>
+                </div>
+
+                <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
+                                <use xlink:href="#twitter"></use>
+                            </svg></a></li>
+                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
+                                <use xlink:href="#instagram"></use>
+                            </svg></a></li>
+                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
+                                <use xlink:href="#facebook"></use>
+                            </svg></a></li>
+                </ul>
+            </footer>
+        </div>
         <!-- Bootstrap JS and jQuery -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -146,6 +210,8 @@
                         var optionText = $(this).text().toLowerCase();
                         $(this).toggle(optionText.indexOf(searchValue) > -1);
                     });
+                    $(this).addClass('open');
+                    $(this).text(searchValue);
                 });
 
                 function calculateRowPrice(row) {
@@ -169,6 +235,11 @@
                     var row = $(this).closest('.order-row');
                     calculateRowPrice(row);
                 })
+                $(document).on('click', '.delete-icon', function () {
+                    $(this).closest('.order-row').remove();
+                    // After deleting, recalculate prices or perform any necessary updates
+                });
+
 
 
                 function addOrderRow() {
@@ -248,6 +319,8 @@
 
             });
         </script>
+
+
     </div>
 </body>
 
