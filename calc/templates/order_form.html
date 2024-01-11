@@ -53,7 +53,6 @@
             align-items: center;
             margin-left: 350px;
         }
-
         p {
             margin-top: 9px;
             margin-bottom: 1rem;
@@ -85,7 +84,7 @@
             <div id="orders-container">
                 <div class="order-row">
                     <div class="form-group">
-                        <label for="product">Select a product:</label>
+                        <label for="products">Select a product:</label>
 
                         <select name="product[]" class="form-control select-product" id="products">
                             <option value="">Select a Product</option>
@@ -127,7 +126,8 @@
         </form>
 
         <!-- Table to display current orders -->
-        <h2>Current Orders</h2>
+        <h2 class="d-flex justify-content-between align-items-center">Current Orders
+        </h2>
         <table id="current-orders" class="table">
             <thead>
                 <tr>
@@ -142,6 +142,7 @@
             </tbody>
             <tfoot>
                 <tr>
+
                     <td colspan="4"><strong>Total Price:</strong></td>
                     <td><span id="total-price">0.00</span></td>
 
@@ -161,6 +162,13 @@
             </div>
         </div>
 
+        <!-- Other content -->
+        <div class="d-flex justify-content-end mt-3">
+            <a href="{% url 'print_receipt' %}" target="_blank" class="btn btn-primary">Print Receipt</a>
+        </div>
+        <!-- Other content -->
+
+
         <div class="container">
             <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
                 <div class="col-md-4 d-flex align-items-center">
@@ -172,17 +180,7 @@
                     <span class="text-muted">© Meena Company, Inc</span>
                 </div>
 
-                <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
-                                <use xlink:href="#twitter"></use>
-                            </svg></a></li>
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
-                                <use xlink:href="#instagram"></use>
-                            </svg></a></li>
-                    <li class="ms-3"><a class="text-muted" href="#"><svg class="bi" width="24" height="24">
-                                <use xlink:href="#facebook"></use>
-                            </svg></a></li>
-                </ul>
+    
             </footer>
         </div>
         <!-- Bootstrap JS and jQuery -->
@@ -224,9 +222,6 @@
                     }
                     var pricePerGram = parseFloat($(row).find('select[name="product[]"]').find(':selected').text().split('₹')[1]);
 
-                    $(row).find('select[name="product[]"], input[name="grams[]"]').on('change', function () {
-                        quantityInput.val('1');
-                    });
                     // Calculate the row price
                     var rowPrice = pricePerGram * grams * quantity * (1 - discount / 100);
                     $(row).find('input[name="price[]"]').val(rowPrice.toFixed(2));
@@ -317,9 +312,173 @@
                     }
                 });
 
+
+                
+                function generatePrintView() {
+                    let printableContent = `
+                    <table border="1">
+                        <!-- First Row: Company Logo and Address -->
+                        <tr>
+                            <td colspan="2" class="logo-address">
+                                <img src="{% static 'images/meenadarkwhite.png' %}" alt="Company Logo">
+                                <p>77-E Lehiri Building,<br>Mohammed Ali Road,<br>Mumbai - 400 003<br>Mobile: +91 6359817779</p>
+                            </td>
+                            <td colspan="2" class="billed-to">
+                                <p>Billed To:</p>
+                                <!-- Add manually filled address space here -->
+                            </td>
+                        </tr>
+            
+                        <!-- Second Row: Product Information Headers -->
+                        <tr>
+                            <th>Product</th>
+                            <th>Grams</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                `;
+                
+                    let totalPrice = 0;
+                    let discountValue = parseFloat($('#discount-current-order').val()) || 0;
+                
+                    // Append each order detail to the printable content
+                    $('#current-orders tbody tr').each(function () {
+                        let product = $(this).find('td:nth-child(1)').text();
+                        let grams = $(this).find('td:nth-child(2)').text();
+                        let quantity = $(this).find('td:nth-child(3)').text();
+                        let price = $(this).find('td:nth-child(5)').text();
+                
+                        totalPrice += parseFloat(price);
+                
+                        printableContent += `
+                            <tr>
+                                <td>${product}</td>
+                                <td>${grams}</td>
+                                <td>${quantity}</td>
+                                <td>${price}</td>
+                            </tr>
+                        `;
+                    });
+                
+                    // Calculate discount and final price
+                    let discountPrice = totalPrice * (discountValue / 100);
+                    let finalPrice = totalPrice - discountPrice;
+                
+                    // Add Total Price, Discount, and Final Price to the invoice
+                    printableContent += `
+                    <!-- Third Row: Total Price, Discount, and Final Price -->
+                    <tr>
+                        <td colspan="3" class="total-section">Total Price:</td>
+                        <td>${totalPrice.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="total-section">Discount (${discountValue}%):</td>
+                        <td>${discountPrice.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="total-section">Final Price:</td>
+                        <td>${finalPrice.toFixed(2)}</td>
+                    </tr>
+                </table>
+        
+                <!-- Signature and Stamp Section -->
+                <div class="signature-stamp">
+                    [Signature and Stamp]
+                </div>
+            `;
+        
+                    // Create a new window and set its content to the printable view
+                    let printWindow = window.open('', '_blank');
+                    printWindow.document.open();
+                    printWindow.document.write(`
+                        <html>
+                        <head>
+                            <title>Print Receipt</title>
+                            <style>
+                                    /* Style for the whole invoice */
+                                    table {
+                                        border-collapse: collapse;
+                                        width: 100%;
+                                        max-width: 100%; /* Ensure table fits within the page */
+                                        margin: 20px auto; /* Center the table with margins */
+                                    }
+                                
+                                    th, td {
+                                        border: 1px solid #ddd;
+                                        padding: 8px;
+                                        text-align: left;
+                                    }
+                                
+                                    th {
+                                        background-color: #f2f2f2;
+                                    }
+                                
+                                    .logo-address {
+                                        text-align: center;
+                                        padding: 20px;
+                                    }
+                                
+                                    .logo-address img {
+                                        max-width: 150px;
+                                    }
+                                
+                                    .logo-address p {
+                                        margin: 10px 0;
+                                    }
+                                
+                                    .billed-to {
+                                        
+                                        padding: 20px;
+                                        padding-bottom:150px
+                                    }
+                                
+                                    .billed-to p {
+                                        margin: 5px 0;
+                                    }
+                                
+                                    .total-section {
+                                        text-align: right;
+                                        padding: 20px;
+                                    }
+                                
+                                    .signature-stamp {
+                                        text-align: right;
+                                        margin-top: 20px;
+                                        padding-right: 20px;
+                                    }
+                                
+                                    /* Define styles for print */
+                                    @media print {
+                                        body {
+                                            margin: 0;
+                                            padding: 0;
+                                        }
+                                
+                                        table {
+                                            width: 100%; /* Ensure table fits within the page when printing */
+                                            page-break-inside: auto;
+                                        }
+                                    }
+                            </style>
+                        </head>
+                        <body>
+                            ${printableContent}
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+        
+                    // Print the generated view
+                    printWindow.print();
+                }
+        
+                // Attach event listener to the Print Receipt button
+                $('a[href="{% url 'print_receipt' %}"]').on('click', function (e) {
+                    e.preventDefault(); // Prevent default link behavior
+                    generatePrintView(); // Generate printable view on click
+                });
             });
         </script>
-
 
     </div>
 </body>

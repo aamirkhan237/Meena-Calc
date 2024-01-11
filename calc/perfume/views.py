@@ -8,9 +8,11 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import redirect
 
 
 def order_form(request):
+    print("Request method:", request.method)
     if request.method == "POST":
         # Retrieve form data
         products_list = request.POST.getlist("product[]")
@@ -56,17 +58,36 @@ def order_form(request):
         serializer = CustomerOrderSerializer(new_orders, many=True)
         serialized_orders = serializer.data
 
-        context = {
-            "orders": serialized_orders,
-            "total_price": total_price,
-        }
-        return JsonResponse({"success": True, "context": context})
+        # Redirect to the print_receipt view passing the processed order data
+        print("Serialized Orders:", serialized_orders)
+        print("Total Price:", total_price)
+        request.session["current_orders"] = serialized_orders  # Save current order data
+        request.session["current_total_price"] = total_price  # Save total price
 
-    else:  # For GET request
+        return redirect("print_receipt")
+    else:
+        print("Request method:", request.method)
+        print("we are in else block of order_form ")
         products = Product.objects.all()
         orders = CustomerOrder.objects.all()
         context = {"products": products, "orders": orders}
         return render(request, "order_form.html", context)
+
+
+def print_receipt(request):
+    # Retrieve current order data from the session
+    current_orders = request.session.get("current_orders")
+    current_total_price = request.session.get("current_total_price")
+
+    return render(
+        request,
+        "receipt.html",
+        {
+            "current_orders": current_orders,
+            "current_total_price": current_total_price,
+            # Other data you want to pass to the receipt.html template
+        },
+    )
 
 
 class CustomPagination(PageNumberPagination):

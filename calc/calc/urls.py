@@ -12,6 +12,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("order_form/", views.order_form, name="order_form"),
     path("api/", include(router.urls)),
-    # path("process_order/", views.process_order, name="process_order"),
+    path("print_receipt/", views.print_receipt, name="print_receipt"),
     # Add more URL patterns as needed
 ]
