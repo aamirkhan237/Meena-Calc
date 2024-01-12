@@ -85,7 +85,6 @@ def print_receipt(request):
         {
             "current_orders": current_orders,
             "current_total_price": current_total_price,
-            # Other data you want to pass to the receipt.html template
         },
     )
 

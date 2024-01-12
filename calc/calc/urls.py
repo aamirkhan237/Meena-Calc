@@ -10,6 +10,7 @@ router.register(r"products", ProductViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", views.order_form, name="order_form"),
     path("order_form/", views.order_form, name="order_form"),
     path("api/", include(router.urls)),
     path("print_receipt/", views.print_receipt, name="print_receipt"),

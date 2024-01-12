@@ -381,10 +381,7 @@
                     </tr>
                 </table>
         
-                <!-- Signature and Stamp Section -->
-                <div class="signature-stamp">
-                    [Signature and Stamp]
-                </div>
+             
             `;
         
                     // Create a new window and set its content to the printable view
@@ -394,17 +391,19 @@
                         <html>
                         <head>
                             <title>Print Receipt</title>
+
                             <style>
                                     /* Style for the whole invoice */
                                     table {
                                         border-collapse: collapse;
                                         width: 100%;
                                         max-width: 100%; /* Ensure table fits within the page */
-                                        margin: 20px auto; /* Center the table with margins */
+                                        margin: 20px auto;
+                                        border: 1px solid black;
                                     }
                                 
                                     th, td {
-                                        border: 1px solid #ddd;
+                                        border: 1px solid black;
                                         padding: 8px;
                                         text-align: left;
                                     }
@@ -464,11 +463,16 @@
                         <body>
                             ${printableContent}
                         </body>
+
                         </html>
                     `);
+                    printWindow.document.write(`
+    <div style="margin-top: 100px;"></div> <!-- Empty space before signature and stamp -->
+    <div class="signature-stamp">
+        Signature and Stamp
+    </div>
+`);
                     printWindow.document.close();
-        
-                    // Print the generated view
                     printWindow.print();
                 }
         
@@ -482,5 +486,4 @@
 
     </div>
 </body>
-
 </html>
