@@ -89,8 +89,7 @@
                         <select name="product[]" class="form-control select-product" id="products">
                             <option value="">Select a Product</option>
                             {% for product in products %}
-                            <option class="option" value="{{ product.id }}">{{ product.name }} -
-                                &#8377; {{product.price_per_gram }}</option>
+                            <option class="option" value="{{ product.id }}">{{ product.name }} - &#8377; {{product.price_per_gram }}</option>
                             {% endfor %}
                         </select>
 
@@ -190,27 +189,29 @@
         <script>
             $(document).ready(function () {
 
-                $('.select-box').on('click', function () {
-                    $(this).toggleClass('open');
-                });
+              
+    $('.select-product').on('click', function () {
+        $(this).toggleClass('open');
+    });
 
-                $('.option').on('click', function () {
-                    var selectedValue = $(this).text();
-                    $('.select-box').removeClass('open');
-                    $('.select-box').text(selectedValue);
-                });
+    $('.option').on('click', function () {
+        var selectedValue = $(this).text();
+        $('.select-product').removeClass('open');
+        // Update the text content of the select box
+        $('.select-product').find('.select-box').text(selectedValue);
+    });
 
-                // Filter options based on user input
-                $('.select-box').on('input', function () {
-                    var searchValue = $(this).text().toLowerCase();
+    // Filter options based on user input
+    $('.select-product').on('input', function () {
+        var searchValue = $(this).find('.select-box').text().toLowerCase();
 
-                    $('.option').each(function () {
-                        var optionText = $(this).text().toLowerCase();
-                        $(this).toggle(optionText.indexOf(searchValue) > -1);
-                    });
-                    $(this).addClass('open');
-                    $(this).text(searchValue);
-                });
+        $('.option').each(function () {
+            var optionText = $(this).text().toLowerCase();
+            $(this).toggle(optionText.indexOf(searchValue) > -1);
+        });
+
+        $(this).addClass('open');
+    });
 
                 function calculateRowPrice(row) {
                     var grams = parseFloat($(row).find('input[name="grams[]"]').val()) || 0;
