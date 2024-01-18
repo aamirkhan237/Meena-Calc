@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-!uz8*bx33qt6y_==8g(l!h6mn_g*gvtbl1)_=w^3^cba++h&7n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = [".vercel.app"]
+ALLOWED_HOSTS = ["meena-calc.vercel.app", "127.0.0.1"]
 
 
 # Application definition
