@@ -24,9 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-!uz8*bx33qt6y_==8g(l!h6mn_g*gvtbl1)_=w^3^cba++h&7n"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["meena-calc.vercel.app", "127.0.0.1", "vercel.app", ".vercel.app"]
+ALLOWED_HOSTS = [
+    "meena-calc.vercel.app",
+    "127.0.0.1",
+    "vercel.app",
+    ".vercel.app",
+    "meena-calc-h2docetm7-aamirkhan-pathans-projects.vercel.app",
+]
 
 
 # Application definition
