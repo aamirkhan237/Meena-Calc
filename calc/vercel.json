@@ -4,7 +4,7 @@
             "src": "calc/wsgi.py",
             "use": "@vercel/python",
             "config": {
-                "maxLambdaSize": "40mb",
+                "maxLambdaSize": "25mb",
                 "runtime": "python3.9"
             }
         }
